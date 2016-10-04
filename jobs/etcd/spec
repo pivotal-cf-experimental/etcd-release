@@ -34,9 +34,6 @@ properties:
     description: "Time without receiving a heartbeat before peer should attempt to become leader in milliseconds. See https://coreos.com/docs/cluster-management/debugging/etcd-tuning"
     default: 1000
 
-  etcd.machines:
-    description: "Addresses of etcd machines"
-
   etcd.cluster:
     description: "Information about etcd cluster"
 
@@ -86,3 +83,11 @@ properties:
 
   etcd.advertise_urls_dns_suffix:
     description: "DNS suffix for all nodes in the etcd cluster"
+
+provides:
+- name: etcd
+  type: etcd
+
+consumes:
+- name: etcd
+  type: etcd

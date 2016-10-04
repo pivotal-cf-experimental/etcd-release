@@ -1,7 +1,7 @@
 ---
 name: eats
 
-director_uuid: <%= `bosh status --uuid` %>
+director_uuid: "<%= `bosh --target lite status --uuid`.strip %>"
 
 releases:
 - name: etcd

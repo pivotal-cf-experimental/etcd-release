@@ -37,7 +37,9 @@ node_name="<%= name.gsub('_', '-') %>-<%= spec.index %>"
     end.flatten.join(" ")
   else
     my_ip = discover_external_ip
-    cluster_members = p("etcd.machines").map { |m| "http://#{m}:4001" }.join(" ")
+    cluster_members = link("etcd").instances.map do |instance|
+      "http://#{instance.address}:4001/"
+    end.join(' ')
   end
 %>
 

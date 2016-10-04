@@ -1,4 +1,4 @@
-director_uuid: BOSH-DIRECTOR-UUID
+director_uuid: "<%= `bosh --target lite status --uuid`.strip %>"
 
 name: etcd
 
