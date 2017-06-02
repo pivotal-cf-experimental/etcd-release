@@ -1,9 +1,8 @@
----
-etcd/etcd-v2.2.0-tls1.2-patch-linux-amd64.tar.gz:
-  object_id: a7ca1a24-89f0-42b9-a452-dc326d49f0ef
-  sha: c1315a7a4ecb52f7d3e5b54775a4d8f735dc33f8
-  size: 6517667
+etcd/etcd-v3.1.8-linux-amd64.tar.gz:
+  size: 9382901
+  object_id: 38cf2108-58b2-4866-575c-89b5f8d22f14
+  sha: 259c6005a5872080a3debad2ed1fa8550781f928
 golang/go1.8.linux-amd64.tar.gz:
-  object_id: 6a31e432-e255-4b00-b9f0-919d20de5eca
-  sha: a93fe8fc245e3554f956bc823f30ef4eb23c2068
   size: 89803580
+  object_id: fc7bf9ef-6c00-4e53-4650-68023c0d0783
+  sha: a93fe8fc245e3554f956bc823f30ef4eb23c2068
