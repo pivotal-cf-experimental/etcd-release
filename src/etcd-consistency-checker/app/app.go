@@ -141,6 +141,8 @@ func leaderFromSelf(client *http.Client, url string) (string, error) {
 			return "", nil
 		case strings.Contains(err.Error(), "connection refused"):
 			return "", nil
+		case strings.Contains(err.Error(), "connection timed out"):
+			return "", nil
 		default:
 			return "", err
 		}
@@ -175,6 +177,8 @@ func getNodeURL(client *http.Client, url, leaderID string) (string, error) {
 		case strings.Contains(err.Error(), "no such host"):
 			return "", nil
 		case strings.Contains(err.Error(), "connection refused"):
+			return "", nil
+		case strings.Contains(err.Error(), "connection timed out"):
 			return "", nil
 		default:
 			return "", err
