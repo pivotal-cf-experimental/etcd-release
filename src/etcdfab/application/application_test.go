@@ -158,6 +158,8 @@ var _ = Describe("Application", func() {
 				"--listen-client-urls", "http://some-client-ip:4001",
 				"--initial-advertise-peer-urls", "http://some-external-ip:7001",
 				"--advertise-client-urls", "http://some-external-ip:4001",
+				"--debug", "true",
+				"--log-package-levels", "etcdmain=DEBUG,etcdserver=DEBUG",
 				"--initial-cluster", "etcd-0=http://some-ip-1:7001",
 				"--initial-cluster-state", "new",
 			}
@@ -255,6 +257,8 @@ var _ = Describe("Application", func() {
 					"--listen-client-urls", "https://some-client-ip:4001",
 					"--initial-advertise-peer-urls", "https://some-name-3.some-dns-suffix:7001",
 					"--advertise-client-urls", "https://some-name-3.some-dns-suffix:4001",
+					"--debug", "true",
+					"--log-package-levels", "etcdmain=DEBUG,etcdserver=DEBUG",
 					"--client-cert-auth",
 					"--trusted-ca-file", "some/cert/dir/server-ca.crt",
 					"--cert-file", "some/cert/dir/server.crt",

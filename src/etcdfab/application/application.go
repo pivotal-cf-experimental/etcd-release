@@ -189,6 +189,9 @@ func (a Application) buildEtcdArgs(cfg config.Config) []string {
 	etcdArgs = append(etcdArgs, "--advertise-client-urls")
 	etcdArgs = append(etcdArgs, cfg.AdvertiseClientURL())
 
+	etcdArgs = append(etcdArgs, "--debug", "true")
+	etcdArgs = append(etcdArgs, "--log-package-levels", "etcdmain=DEBUG,etcdserver=DEBUG")
+
 	if cfg.Etcd.RequireSSL {
 		etcdArgs = append(etcdArgs, "--client-cert-auth")
 		etcdArgs = append(etcdArgs, "--trusted-ca-file")
