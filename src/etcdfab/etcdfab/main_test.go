@@ -165,8 +165,6 @@ var _ = Describe("EtcdFab", func() {
 						"--listen-client-urls", "http://some-client-ip:4001",
 						"--initial-advertise-peer-urls", "http://some-external-ip:7001",
 						"--advertise-client-urls", "http://some-external-ip:4001",
-						"--debug", "true",
-						"--log-package-levels", "etcdmain=DEBUG,etcdserver=DEBUG",
 						"--initial-cluster", "some-name-3=http://some-external-ip:7001",
 						"--initial-cluster-state", "new",
 					}))
@@ -209,8 +207,6 @@ var _ = Describe("EtcdFab", func() {
 						"--listen-client-urls", "http://some-client-ip:4001",
 						"--initial-advertise-peer-urls", "http://some-external-ip:7001",
 						"--advertise-client-urls", "http://some-external-ip:4001",
-						"--debug", "true",
-						"--log-package-levels", "etcdmain=DEBUG,etcdserver=DEBUG",
 						"--initial-cluster", "some-name-1=http://some-other-external-ip:7001,some-name-3=http://some-external-ip:7001",
 						"--initial-cluster-state", "existing",
 					}))
@@ -280,8 +276,6 @@ var _ = Describe("EtcdFab", func() {
 					"--listen-client-urls", "https://some-client-ip:4001",
 					"--initial-advertise-peer-urls", "https://some-name-3.127.0.0.1:7001",
 					"--advertise-client-urls", "https://some-name-3.127.0.0.1:4001",
-					"--debug", "true",
-					"--log-package-levels", "etcdmain=DEBUG,etcdserver=DEBUG",
 					"--client-cert-auth",
 					"--trusted-ca-file", "../fixtures/server-ca.crt",
 					"--cert-file", "../fixtures/server.crt",
