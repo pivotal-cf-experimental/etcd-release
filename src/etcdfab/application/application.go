@@ -168,10 +168,6 @@ func (a Application) buildEtcdArgs(cfg config.Config) []string {
 	etcdArgs = append(etcdArgs, "--name")
 	etcdArgs = append(etcdArgs, cfg.NodeName())
 
-	if cfg.Etcd.EnableDebugLogging {
-		etcdArgs = append(etcdArgs, "--debug")
-	}
-
 	etcdArgs = append(etcdArgs, "--data-dir")
 	etcdArgs = append(etcdArgs, cfg.Etcd.DataDir)
 
