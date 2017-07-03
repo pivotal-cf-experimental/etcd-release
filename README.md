@@ -1,3 +1,9 @@
+# Kubo-etcd release
+
+This is fork of etcd-release. It is used in KuBo project (https://github.com/cloudfoundry-incubator/kubo-deployment).
+It used ETCD v3 underneath.
+See below documentation of original etcd-release.
+
 # etcd-release
 
 This is a [BOSH](http://bosh.io) release for [etcd](https://github.com/coreos/etcd).
