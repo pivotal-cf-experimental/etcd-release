@@ -107,7 +107,7 @@ function force_compilation() {
 
   pushd /tmp > /dev/null
   bosh -d etcd-compilation -n deploy "${scripts_dir}/fixtures/etcd_compilation.yml"
-  bosh -d etcd-compilation export-release "etcd/${ETCD_RELEASE_VERSION}" "ubuntu-trusty/${stemcell_version}"
+  bosh -d etcd-compilation export-release "kubo-etcd/${ETCD_RELEASE_VERSION}" "ubuntu-trusty/${stemcell_version}"
   bosh -d etcd-compilation export-release "consul/${consul_release_version}" "ubuntu-trusty/${stemcell_version}"
   bosh -d etcd-compilation export-release "turbulence/${turbulence_version}" "ubuntu-trusty/${stemcell_version}"
   bosh -d etcd-compilation export-release "bosh-warden-cpi/${warden_cpi_version}" "ubuntu-trusty/${stemcell_version}"
@@ -121,8 +121,8 @@ function cleanup_releases() {
   bosh -n delete-release turbulence/"${turbulence_version}"
   bosh -n delete-release bosh-warden-cpi/"${warden_cpi_version}"
   bosh -n delete-release consul/"${consul_release_version}"
-  bosh -n delete-release etcd/"${LATEST_ETCD_RELEASE_VERSION}"
-  bosh -n delete-release etcd/"${ETCD_RELEASE_VERSION}"
+  bosh -n delete-release kubo-etcd/"${LATEST_ETCD_RELEASE_VERSION}"
+  bosh -n delete-release kubo-etcd/"${ETCD_RELEASE_VERSION}"
   set -e
 }
 

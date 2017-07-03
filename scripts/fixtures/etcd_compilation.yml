@@ -2,7 +2,7 @@
 name: etcd-compilation
 
 releases:
-- name: etcd
+- name: kubo-etcd
   version: latest
 - name: consul
   version: latest
