@@ -38,6 +38,31 @@ func NewEtcdManifestWithInstanceCountAndReleaseVersion(deploymentPrefix string, 
 
 	manifest, err = ops.ApplyOp(manifest, ops.Op{
 		Type:  "replace",
+		Path:  "/releases/name=etcd/name",
+		Value: "kubo-etcd",
+	})
+	if err != nil {
+		return "", err
+	}
+	manifest, err = ops.ApplyOp(manifest, ops.Op{
+		Type:  "replace",
+		Path:  "/instance_groups/name=testconsumer/jobs/name=etcd_testconsumer/release/name=etcd/name",
+		Value: "kubo-etcd",
+	})
+	if err != nil {
+		return "", err
+	}
+	manifest, err = ops.ApplyOp(manifest, ops.Op{
+		Type:  "replace",
+		Path:  "/instance_groups/name=etcd/jobs/name=etcd/release/name=etcd/name",
+		Value: "kubo-etcd",
+	})
+	if err != nil {
+		return "", err
+	}
+
+	manifest, err = ops.ApplyOp(manifest, ops.Op{
+		Type:  "replace",
 		Path:  "/instance_groups/name=etcd/instances",
 		Value: instanceCount,
 	})

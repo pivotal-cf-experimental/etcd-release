@@ -6,7 +6,7 @@ stemcells:
   version: latest
 
 releases:
-- name: etcd
+- name: kubo-etcd
   version: latest
 
 instance_groups:
@@ -22,7 +22,7 @@ instance_groups:
   networks: [{name: private}]
   jobs:
   - name: etcd
-    release: etcd
+    release: kubo-etcd
     consumes:
       etcd: {from: etcd_server}
     provides:

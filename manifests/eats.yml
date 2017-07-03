@@ -2,7 +2,7 @@
 name: eats
 
 releases:
-- name: etcd
+- name: kubo-etcd
   version: ((etcd_release_version))
 
 stemcells:
@@ -20,7 +20,7 @@ instance_groups:
   networks: [{name: private}]
   jobs:
   - name: acceptance-tests
-    release: etcd
+    release: kubo-etcd
 
 properties:
   etcd:

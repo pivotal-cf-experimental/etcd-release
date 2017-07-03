@@ -9,7 +9,7 @@ stemcells:
 releases:
 - name: consul
   version: latest
-- name: etcd
+- name: kubo-etcd
   version: latest
 
 instance_groups:
@@ -203,7 +203,7 @@ instance_groups:
           services:
             etcd: {}
   - name: etcd
-    release: etcd
+    release: kubo-etcd
     consumes:
       etcd: {from: etcd_server}
     provides:
@@ -455,7 +455,7 @@ instance_groups:
       consul_client: {from: client_link}
       consul: nil
   - name: etcd_proxy
-    release: etcd
+    release: kubo-etcd
     properties:
       etcd_proxy:
         etcd:
