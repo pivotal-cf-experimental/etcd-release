@@ -1,3 +1,0 @@
-#!/bin/bash -exu
-
-/opt/rubies/ruby-2.2.4/bin/bosh $@
