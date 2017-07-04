@@ -65,7 +65,7 @@ var _ = Describe("split brain one leader", func() {
 					Path: "/instance_groups/name=etcd?/jobs/-",
 					Value: map[string]string{
 						"name":    "iptables_agent",
-						"release": "etcd",
+						"release": "kubo-etcd",
 					},
 				},
 				{
@@ -73,7 +73,7 @@ var _ = Describe("split brain one leader", func() {
 					Path: "/instance_groups/name=etcd?/jobs/-",
 					Value: map[string]string{
 						"name":    "monit_agent",
-						"release": "etcd",
+						"release": "kubo-etcd",
 					},
 				},
 			})

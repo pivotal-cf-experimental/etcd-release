@@ -51,7 +51,7 @@ var _ = Describe("consistency checker", func() {
 					Path: "/instance_groups/name=etcd/jobs/-",
 					Value: map[string]string{
 						"name":    "iptables_agent",
-						"release": "etcd",
+						"release": "kubo-etcd",
 					},
 				})
 				Expect(err).NotTo(HaveOccurred())
