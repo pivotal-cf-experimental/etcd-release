@@ -75,7 +75,7 @@ var _ = Describe("Multiple instance rolling upgrade", func() {
 			var err error
 			manifest, err = ops.ApplyOp(manifest, ops.Op{
 				Type:  "replace",
-				Path:  "/releases/name=etcd/version",
+				Path:  "/releases/name=kubo-etcd/version",
 				Value: helpers.EtcdDevReleaseVersion(),
 			})
 			Expect(err).NotTo(HaveOccurred())
