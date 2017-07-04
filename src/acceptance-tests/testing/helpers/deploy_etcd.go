@@ -46,7 +46,7 @@ func NewEtcdManifestWithInstanceCountAndReleaseVersion(deploymentPrefix string, 
 	}
 	manifest, err = ops.ApplyOp(manifest, ops.Op{
 		Type:  "replace",
-		Path:  "/instance_groups/name=testconsumer/jobs/name=etcd_testconsumer/release/name=etcd/name",
+		Path:  "/instance_groups/name=testconsumer/jobs/name=etcd_testconsumer/release",
 		Value: "kubo-etcd",
 	})
 	if err != nil {
@@ -54,7 +54,7 @@ func NewEtcdManifestWithInstanceCountAndReleaseVersion(deploymentPrefix string, 
 	}
 	manifest, err = ops.ApplyOp(manifest, ops.Op{
 		Type:  "replace",
-		Path:  "/instance_groups/name=etcd/jobs/name=etcd/release/name=etcd/name",
+		Path:  "/instance_groups/name=etcd/jobs/name=etcd/release",
 		Value: "kubo-etcd",
 	})
 	if err != nil {
