@@ -109,7 +109,7 @@ func VerifyDeploymentRelease(client bosh.Client, deploymentName string, releaseV
 	for _, deployment := range deployments {
 		if deployment.Name == deploymentName {
 			for _, release := range deployment.Releases {
-				if release.Name == "etcd" {
+				if release.Name == "kubo-etcd" {
 					switch {
 					case len(release.Versions) > 1:
 						err = errors.New("too many releases")
