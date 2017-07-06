@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/cloudfoundry-incubator/etcd-release/src/etcdfab/client"
 	"github.com/cloudfoundry-incubator/etcd-release/src/etcdfab/cluster"
@@ -14,11 +15,8 @@ import (
 	"code.cloudfoundry.org/lager"
 )
 
-const etcdPidFilename = "etcd.pid"
-
 type Application struct {
 	command            command
-	commandPidPath     string
 	configFilePath     string
 	linkConfigFilePath string
 	etcdClient         etcdClient
@@ -45,6 +43,7 @@ type clusterController interface {
 type etcdClient interface {
 	Configure(client.Config) error
 	MemberRemove(string) error
+	MemberList() ([]client.Member, error)
 }
 
 type logger interface {
@@ -114,47 +113,162 @@ func (a Application) Start() error {
 		return err
 	}
 
-	a.logger.Info("application.synchronized-controller.verify-synced", lager.Data{
-		"pid": pid,
-	})
-	err = a.syncController.VerifySynced()
-	if err != nil {
-		a.logger.Error("application.synchronized-controller.verify-synced.failed", err)
+	a.logger.Info("application.synchronized-controller.verify-synced")
+	syncErr := a.syncController.VerifySynced()
+	if syncErr != nil {
+		a.logger.Error("application.synchronized-controller.verify-synced.failed", syncErr)
 
-		memberRemoveErr := a.etcdClient.MemberRemove(cfg.NodeName())
-		if memberRemoveErr != nil {
-			a.logger.Error("application.etcd-client.member-remove.failed", memberRemoveErr)
+		if initialClusterState.State == "existing" {
+			a.logger.Info("application.remove-self-from-cluster")
+			a.removeSelfFromCluster(cfg)
 		}
+		a.removeDataDir(cfg)
 
-		a.logger.Info("application.kill-pid", lager.Data{
-			"pid": pid,
-		})
-		killErr := a.command.Kill(pid)
+		a.logger.Info("application.kill")
+		killErr := a.kill(cfg.PidFile())
 		if killErr != nil {
-			a.logger.Error("application.kill-pid.failed", killErr)
 			return killErr
 		}
+		return syncErr
+	}
 
-		a.logger.Info("application.os.remove-all", lager.Data{
-			"data_dir": cfg.Etcd.DataDir,
-		})
-		removeErr := os.RemoveAll(cfg.Etcd.DataDir)
-		if removeErr != nil {
-			//not tested
-			a.logger.Error("application.os.remove-all.failed", removeErr)
-		}
-
+	a.logger.Info("application.write-pid-file", lager.Data{
+		"pid":  pid,
+		"path": cfg.PidFile(),
+	})
+	err = ioutil.WriteFile(cfg.PidFile(), []byte(fmt.Sprintf("%d", pid)), 0644)
+	if err != nil {
+		a.logger.Error("application.write-pid-file.failed", err)
 		return err
 	}
 
-	pidFilePath := filepath.Join(cfg.Etcd.RunDir, etcdPidFilename)
-	a.logger.Info("application.write-pid-file", lager.Data{
-		"pid":  pid,
-		"path": pidFilePath,
-	})
-	err = ioutil.WriteFile(pidFilePath, []byte(fmt.Sprintf("%d", pid)), 0644)
+	a.logger.Info("application.start.success")
+
+	return nil
+}
+
+func (a Application) Stop() error {
+	a.logger.Info("application.stop")
+
+	cfg, err := config.ConfigFromJSONs(a.configFilePath, a.linkConfigFilePath)
 	if err != nil {
-		a.logger.Error("application.write-pid-file.failed", err)
+		a.logger.Error("application.read-config-file.failed", err)
+		return err
+	}
+
+	err = a.etcdClient.Configure(cfg)
+	if err != nil {
+		a.logger.Error("application.etcd-client.configure.failed", err)
+		return err
+	}
+
+	teardown := a.priorClusterHadOtherNodes(cfg.NodeName())
+	if teardown {
+		a.logger.Info("application.remove-self-from-cluster")
+		a.removeSelfFromCluster(cfg)
+	}
+
+	a.removeDataDir(cfg)
+
+	a.logger.Info("application.kill")
+	err = a.kill(cfg.PidFile())
+	if err != nil {
+		return err
+	}
+
+	a.logger.Info("application.stop.success")
+	return nil
+}
+
+func (a Application) priorClusterHadOtherNodes(nodeName string) bool {
+	a.logger.Info("application.etcd-client.member-list")
+	memberList, err := a.etcdClient.MemberList()
+	if err != nil {
+		a.logger.Error("application.etcd-client.member-list.failed", err)
+		return false
+	}
+
+	a.logger.Info("application.etcd-client.member-list", lager.Data{"member-list": memberList})
+	if len(memberList) == 1 && memberList[0].Name == nodeName {
+		return false
+	}
+
+	if len(memberList) == 1 && memberList[0].Name != nodeName {
+		return true
+	}
+
+	if len(memberList) > 1 {
+		return true
+	}
+
+	return false
+}
+
+func (a Application) removeSelfFromCluster(cfg config.Config) {
+	memberList, err := a.etcdClient.MemberList()
+	if err != nil {
+		a.logger.Error("application.etcd-client.member-list.failed", err)
+	}
+	var memberID string
+	for _, member := range memberList {
+		if member.Name == cfg.NodeName() {
+			memberID = member.ID
+		}
+	}
+
+	a.logger.Info("application.etcd-client.member-remove", lager.Data{"member-id": memberID})
+	err = a.etcdClient.MemberRemove(memberID)
+	if err != nil {
+		a.logger.Error("application.etcd-client.member-remove.failed", err)
+	}
+}
+
+func (a Application) removeDataDir(cfg config.Config) {
+	a.logger.Info("application.remove-data-dir", lager.Data{"data-dir": cfg.Etcd.DataDir})
+	d, err := os.Open(cfg.Etcd.DataDir)
+	if err != nil {
+		a.logger.Error("application.remove-data-dir", err)
+	}
+	defer d.Close()
+	files, err := d.Readdirnames(-1)
+	if err != nil {
+		a.logger.Error("application.remove-data-dir", err)
+	}
+	for _, file := range files {
+		err = os.RemoveAll(filepath.Join(cfg.Etcd.DataDir, file))
+	}
+	if err != nil {
+		a.logger.Error("application.remove-data-dir", err)
+	}
+}
+
+func (a Application) kill(pidPath string) error {
+	a.logger.Info("application.read-pid-file", lager.Data{"pid-file": pidPath})
+	pidFileContents, err := ioutil.ReadFile(pidPath)
+	if err != nil {
+		a.logger.Error("application.read-pid-file.failed", err)
+		return err
+	}
+
+	a.logger.Info("application.convert-pid-file-to-pid")
+	pid, err := strconv.Atoi(string(pidFileContents))
+	if err != nil {
+		a.logger.Error("application.convert-pid-file-to-pid.failed", err)
+		return err
+	}
+
+	a.logger.Info("application.kill-pid", lager.Data{"pid": pid})
+	err = a.command.Kill(pid)
+	if err != nil {
+		a.logger.Error("application.kill-pid.failed", err)
+		return err
+	}
+
+	a.logger.Info("application.remove-pid-file")
+	err = os.Remove(pidPath)
+	if err != nil {
+		//not tested
+		a.logger.Error("application.remove-pid-file.failed", err)
 		return err
 	}
 
@@ -167,6 +281,10 @@ func (a Application) buildEtcdArgs(cfg config.Config) []string {
 	var etcdArgs []string
 	etcdArgs = append(etcdArgs, "--name")
 	etcdArgs = append(etcdArgs, cfg.NodeName())
+
+	if cfg.Etcd.EnableDebugLogging {
+		etcdArgs = append(etcdArgs, "--debug")
+	}
 
 	etcdArgs = append(etcdArgs, "--data-dir")
 	etcdArgs = append(etcdArgs, cfg.Etcd.DataDir)

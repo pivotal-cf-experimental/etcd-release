@@ -2,7 +2,8 @@
 
 set -u -x
 
-source /var/vcap/jobs/etcd/bin/etcd_bosh_utils.sh
+LOG_DIR=/var/vcap/sys/log/etcd
+JOB_DIR=/var/vcap/jobs/etcd
 
 exec 3>&1
 
@@ -11,7 +12,7 @@ exec 2>> ${LOG_DIR}/drain.log
 
 /var/vcap/jobs/etcd/bin/etcd_network_diagnostics_run_ctl.sh stop
 
-safe_teardown "$(member_list)"
+${JOB_DIR}/bin/etcd_ctl stop
 
 echo 0 >&3
 exit 0
