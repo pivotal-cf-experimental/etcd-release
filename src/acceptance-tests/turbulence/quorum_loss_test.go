@@ -186,7 +186,7 @@ var _ = Describe("quorum loss", func() {
 		})
 	}
 
-	Context("without TLS", func() {
+	XContext("without TLS", func() {
 		QuorumLossTest(false)
 	})
 
