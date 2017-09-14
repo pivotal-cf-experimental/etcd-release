@@ -101,6 +101,7 @@ func (a App) Run() error {
 
 func newHttpClient(ca, cert, key string) (*http.Client, error) {
 	var client *http.Client
+	timeout := time.Duration(5 * time.Second)
 	if ca != "" && cert != "" && key != "" {
 		keypair, err := tls.LoadX509KeyPair(cert, key)
 		if err != nil {
@@ -121,9 +122,9 @@ func newHttpClient(ca, cert, key string) (*http.Client, error) {
 		}
 		tlsConfig.BuildNameToCertificate()
 		transport := &http.Transport{TLSClientConfig: tlsConfig}
-		client = &http.Client{Transport: transport}
+		client = &http.Client{Transport: transport, Timeout: timeout}
 	} else {
-		client = &http.Client{}
+		client = &http.Client{Timeout: timeout}
 	}
 
 	return client, nil
