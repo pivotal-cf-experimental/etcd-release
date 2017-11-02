@@ -130,3 +130,7 @@ properties:
   etcd.enable_debug_logging:
     description: "Enables etcd's debug logging"
     default: false
+
+  options.delete_data_dir_on_stop:
+    description: "Boolean flag to delete etcd data dir on application stop"
+    default: true

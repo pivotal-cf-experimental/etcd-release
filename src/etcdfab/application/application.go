@@ -168,7 +168,9 @@ func (a Application) Stop() error {
 		a.removeSelfFromCluster(cfg)
 	}
 
-	a.removeDataDir(cfg)
+	if cfg.Options.DeleteDataDirOnStop == true {
+		a.removeDataDir(cfg)
+	}
 
 	a.logger.Info("application.kill")
 	err = a.kill(cfg.PidFile())

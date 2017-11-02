@@ -37,9 +37,14 @@ type Etcd struct {
 	EnableDebugLogging     bool `json:"enable_debug_logging"`
 }
 
+type Options struct {
+	DeleteDataDirOnStop bool `json:"delete_data_dir_on_stop"`
+}
+
 type Config struct {
-	Node Node
-	Etcd Etcd
+	Node    Node
+	Etcd    Etcd
+	Options Options
 }
 
 func defaultConfig() Config {

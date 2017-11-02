@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"code.cloudfoundry.org/lager"
 
@@ -684,6 +685,9 @@ var _ = Describe("Application", func() {
 					"client_ip":                          "some-client-ip",
 					"advertise_urls_dns_suffix":          "some-dns-suffix",
 				},
+				"options": map[string]interface{}{
+					"delete_data_dir_on_stop": true,
+				},
 			}
 			configFileName = createConfig(tmpDir, "config-file", configuration)
 
@@ -711,6 +715,9 @@ var _ = Describe("Application", func() {
 					ClientIP:               "some-client-ip",
 					AdvertiseURLsDNSSuffix: "some-dns-suffix",
 					Machines:               []string{"some-ip-1", "some-ip-2"},
+				},
+				Options: config.Options{
+					DeleteDataDirOnStop: true,
 				},
 			}
 
@@ -819,6 +826,66 @@ var _ = Describe("Application", func() {
 						Action: "application.stop.success",
 					},
 				}))
+			})
+		})
+
+		Context("If delete_data_dir_on_stop is set to true", func() {
+			BeforeEach(func() {
+				fileOut, err := os.Create(strings.Join([]string{dataDir, "foo"}, "/"))
+				Expect(err).NotTo(HaveOccurred())
+				defer fileOut.Close()
+
+				keepDataDirConfiguration := map[string]interface{}{
+					"node": map[string]interface{}{
+						"name":        "some_name",
+						"index":       3,
+						"external_ip": "some-external-ip",
+					},
+					"etcd": map[string]interface{}{
+						"etcd_path":                          "path-to-etcd",
+						"cert_dir":                           "some/cert/dir",
+						"run_dir":                            runDir,
+						"data_dir":                           dataDir,
+						"heartbeat_interval_in_milliseconds": 10,
+						"election_timeout_in_milliseconds":   20,
+						"peer_require_ssl":                   false,
+						"peer_ip":                            "some-peer-ip",
+						"require_ssl":                        false,
+						"client_ip":                          "some-client-ip",
+						"advertise_urls_dns_suffix":          "some-dns-suffix",
+					},
+					"options": map[string]interface{}{
+						"delete_data_dir_on_stop": false,
+					},
+				}
+
+				keepDataDirConfigFileName := createConfig(tmpDir, "config-file", keepDataDirConfiguration)
+
+				app = application.New(application.NewArgs{
+					Command:            fakeCommand,
+					ConfigFilePath:     keepDataDirConfigFileName,
+					LinkConfigFilePath: linkConfigFileName,
+					EtcdClient:         fakeEtcdClient,
+					ClusterController:  fakeClusterController,
+					SyncController:     fakeSyncController,
+					OutWriter:          &outWriter,
+					ErrWriter:          &errWriter,
+					Logger:             fakeLogger,
+				})
+			})
+
+			It("stops etcd and doesn't clean up", func() {
+				err := app.Stop()
+				Expect(err).NotTo(HaveOccurred())
+
+				By("keeping the contents inside data dir", func() {
+					d, err := os.Open(dataDir)
+					Expect(err).NotTo(HaveOccurred())
+					defer d.Close()
+					files, err := d.Readdirnames(-1)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(len(files)).ToNot(Equal(0))
+				})
 			})
 		})
 

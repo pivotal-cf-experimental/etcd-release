@@ -56,6 +56,9 @@ var _ = Describe("Config", func() {
 					"advertise_urls_dns_suffix":          "some-dns-suffix",
 					"enable_debug_logging":               true,
 				},
+				"options": map[string]interface{}{
+					"delete_data_dir_on_stop": false,
+				},
 			}
 			configFilePath = writeConfigurationFile(tmpDir, "config-file", configuration)
 
@@ -101,6 +104,9 @@ var _ = Describe("Config", func() {
 					Machines:               []string{"some-ip-1", "some-ip-2", "some-ip-3"},
 					EnableDebugLogging:     true,
 				},
+				Options: config.Options{
+					DeleteDataDirOnStop: false,
+				},
 			}))
 		})
 
@@ -134,6 +140,9 @@ var _ = Describe("Config", func() {
 						AdvertiseURLsDNSSuffix: "some-dns-suffix",
 						EnableDebugLogging:     true,
 					},
+					Options: config.Options{
+						DeleteDataDirOnStop: false,
+					},
 				}))
 			})
 		})
@@ -152,6 +161,7 @@ var _ = Describe("Config", func() {
 			Expect(cfg.Etcd.CertDir).To(Equal("/var/vcap/jobs/etcd/config/certs"))
 			Expect(cfg.Etcd.RunDir).To(Equal("/var/vcap/sys/run/etcd"))
 			Expect(cfg.Etcd.DataDir).To(Equal("/var/vcap/store/etcd"))
+			Expect(cfg.Options.DeleteDataDirOnStop).To(Equal(false))
 		})
 
 		Context("failure cases", func() {
