@@ -70,6 +70,17 @@ func NewEtcdManifestWithInstanceCountAndReleaseVersion(deploymentPrefix string, 
 		return "", err
 	}
 
+	if instanceCount == 1 {
+		manifest, err = ops.ApplyOp(manifest, ops.Op{
+			Type: "replace",
+			Path: "/instance_groups/name=etcd/properties/etcd/delete_data_dir_on_stop?",
+			Value: false,
+		})
+		if err != nil {
+			return "", err
+		}
+	}
+
 	manifestYAML, err := boshClient.ResolveManifestVersionsV2([]byte(manifest))
 	if err != nil {
 		return "", err
