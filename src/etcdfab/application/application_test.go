@@ -528,9 +528,9 @@ var _ = Describe("Application", func() {
 						"external_ip": "some-external-ip",
 					},
 					"etcd": map[string]interface{}{
-						"etcd_path": "path-to-etcd",
-						"cert_dir":  "some/cert/dir",
-						"run_dir":   runDir,
+						"etcd_path":                          "path-to-etcd",
+						"cert_dir":                           "some/cert/dir",
+						"run_dir":                            runDir,
 						"heartbeat_interval_in_milliseconds": 10,
 						"election_timeout_in_milliseconds":   20,
 						"peer_require_ssl":                   true,
@@ -684,9 +684,7 @@ var _ = Describe("Application", func() {
 					"require_ssl":                        false,
 					"client_ip":                          "some-client-ip",
 					"advertise_urls_dns_suffix":          "some-dns-suffix",
-				},
-				"options": map[string]interface{}{
-					"delete_data_dir_on_stop": true,
+					"delete_data_dir_on_stop":            true,
 				},
 			}
 			configFileName = createConfig(tmpDir, "config-file", configuration)
@@ -715,9 +713,7 @@ var _ = Describe("Application", func() {
 					ClientIP:               "some-client-ip",
 					AdvertiseURLsDNSSuffix: "some-dns-suffix",
 					Machines:               []string{"some-ip-1", "some-ip-2"},
-				},
-				Options: config.Options{
-					DeleteDataDirOnStop: true,
+					DeleteDataDirOnStop:    true,
 				},
 			}
 

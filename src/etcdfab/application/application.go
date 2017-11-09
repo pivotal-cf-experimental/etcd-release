@@ -168,7 +168,7 @@ func (a Application) Stop() error {
 		a.removeSelfFromCluster(cfg)
 	}
 
-	if cfg.Options.DeleteDataDirOnStop == true {
+	if cfg.Etcd.DeleteDataDirOnStop {
 		a.removeDataDir(cfg)
 	}
 
