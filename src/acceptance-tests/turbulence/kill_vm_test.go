@@ -18,7 +18,7 @@ import (
 )
 
 var _ = Describe("KillVm", func() {
-	KillVMTest := func(enableSSL bool) {
+	KillVMTest := func(enableSSL bool, instanceCount int) {
 		var (
 			turbulenceManifest     string
 			turbulenceManifestName string
@@ -50,6 +50,8 @@ var _ = Describe("KillVm", func() {
 				deploymentSuffix = "kill-vm-tls"
 			}
 
+			deploymentSuffix = fmt.Sprintf("%s-nodecount-%d", deploymentSuffix, instanceCount)
+
 			By("deploying turbulence", func() {
 				var err error
 				turbulenceManifest, err = helpers.DeployTurbulence(deploymentSuffix, boshClient)
@@ -71,8 +73,8 @@ var _ = Describe("KillVm", func() {
 				turbulenceClient = turbulenceclient.NewClient(fmt.Sprintf("https://turbulence:%s@%s:8080", turbulencePassword, turbulenceIPs[0]), 5*time.Minute, 2*time.Second)
 			})
 
-			By("deploying 3 node etcd", func() {
-				etcdManifest, err = helpers.DeployEtcdWithInstanceCount(deploymentSuffix, 3, enableSSL, boshClient)
+			By(fmt.Sprintf("deploying %d node etcd", instanceCount), func() {
+				etcdManifest, err = helpers.DeployEtcdWithInstanceCount(deploymentSuffix, instanceCount, enableSSL, boshClient)
 				Expect(err).NotTo(HaveOccurred())
 
 				etcdManifestName, err = ops.ManifestName(etcdManifest)
@@ -125,24 +127,26 @@ var _ = Describe("KillVm", func() {
 				})
 
 				By("killing indices", func() {
-					vmIDs, err := helpers.GetVMIDByIndices(boshClient, etcdManifestName, "etcd", []int{rand.Intn(3)})
+					vmIDs, err := helpers.GetVMIDByIndices(boshClient, etcdManifestName, "etcd", []int{rand.Intn(instanceCount)})
 					Expect(err).NotTo(HaveOccurred())
 
 					err = turbulenceClient.KillIDs(vmIDs)
 					Expect(err).ToNot(HaveOccurred())
 				})
 
-				By("reading the value from etcd", func() {
-					Eventually(func() (string, error) {
-						return etcdClient.Get(testKey1)
-					}, "10s", "1s").Should(Equal(testValue1))
-				})
+				if instanceCount > 1 {
+					By("reading the value from etcd", func() {
+						Eventually(func() (string, error) {
+							return etcdClient.Get(testKey1)
+						}, "10s", "1s").Should(Equal(testValue1))
+					})
 
-				By("setting a new persistent value", func() {
-					Eventually(func() error {
-						return etcdClient.Set(testKey2, testValue2)
-					}, "10s", "1s").Should(Succeed())
-				})
+					By("setting a new persistent value", func() {
+						Eventually(func() error {
+							return etcdClient.Set(testKey2, testValue2)
+						}, "10s", "1s").Should(Succeed())
+					})
+				}
 
 				By("fixing the deployment", func() {
 					Eventually(func() ([]string, error) {
@@ -154,28 +158,49 @@ var _ = Describe("KillVm", func() {
 					}, "12m", "1m").ShouldNot(HaveOccurred())
 
 					Eventually(func() ([]bosh.VM, error) {
-						return helpers.DeploymentVMs(boshClient, etcdManifestName)
+						vms, err := helpers.DeploymentVMs(boshClient, etcdManifestName)
+						runningVms := []bosh.VM{}
+						for _, vm := range vms {
+							if vm.State == "running" {
+								runningVms = append(runningVms, vm)
+							}
+						}
+						return runningVms, err
 					}, "10m", "10s").Should(ConsistOf(helpers.GetVMsFromManifest(etcdManifest)))
 				})
 
 				By("reading each value from the resurrected VM", func() {
-					value, err := etcdClient.Get(testKey1)
-					Expect(err).ToNot(HaveOccurred())
+					var value string
+					var err error
+					Eventually(func() error {
+						value, err = etcdClient.Get(testKey1)
+						return err
+					}, "2m", "10s").ShouldNot(HaveOccurred())
 					Expect(value).To(Equal(testValue1))
 
-					value, err = etcdClient.Get(testKey2)
-					Expect(err).ToNot(HaveOccurred())
-					Expect(value).To(Equal(testValue2))
+					if instanceCount > 1 {
+						value, err = etcdClient.Get(testKey2)
+						Expect(err).ToNot(HaveOccurred())
+						Expect(value).To(Equal(testValue2))
+					}
 				})
 			})
 		})
 	}
 
-	Context("without TLS", func() {
-		KillVMTest(false)
+	Context("3 node without TLS", func() {
+		KillVMTest(false, 3)
 	})
 
-	Context("with TLS", func() {
-		KillVMTest(true)
+	Context("3 node with TLS", func() {
+		KillVMTest(true, 3)
+	})
+
+	Context("1 node without TLS", func() {
+		KillVMTest(false, 1)
+	})
+
+	Context("1 node with TLS", func() {
+		KillVMTest(true, 1)
 	})
 })
