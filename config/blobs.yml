@@ -1,7 +1,7 @@
-etcd/etcd-v3.1.8-linux-amd64.tar.gz:
-  size: 9382901
-  object_id: 38cf2108-58b2-4866-575c-89b5f8d22f14
-  sha: 259c6005a5872080a3debad2ed1fa8550781f928
+etcd/etcd-v3.2.10-linux-amd64.tar.gz:
+  size: 10545776
+  object_id: a308fbbf-a73a-4fc4-4c9b-afd68cd56784
+  sha: 568b41ddde1d73062527988931a607180513d669
 golang/go1.8.linux-amd64.tar.gz:
   size: 89803580
   object_id: fc7bf9ef-6c00-4e53-4650-68023c0d0783
