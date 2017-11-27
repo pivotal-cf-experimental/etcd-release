@@ -26,9 +26,10 @@ main() {
 
 remove_previous_blob() {
   local previous_blob_name
-  previous_blob_name=$(bosh blobs --column path | grep etcd )
+  previous_blob_name=$(bosh blobs --json | jq -r .Tables[].Rows[].path | grep etcd)
   bosh remove-blob "${previous_blob_name}"
 }
+
 download() {
   local binary_name staging_dir etcd_version
   binary_name="$1"
