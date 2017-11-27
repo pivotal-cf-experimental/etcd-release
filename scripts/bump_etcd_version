@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+set -e
+
+main() {
+  local staging_dir etcd_version binary
+  etcd_version=$1
+
+  if [ $# -ne 1 ]; then
+    echo "Usage: $(basename "$0") [ETCD VERSION]"
+    exit  1
+  fi
+
+  staging_dir=$(mktemp -d)
+  binary="etcd-v${etcd_version}-linux-amd64.tar.gz"
+
+  trap '{ rm -rf "$staging_dir"; }' EXIT
+
+  remove_previous_blob
+  download "${binary}" "${staging_dir}" "${etcd_version}"
+  add_blob "${binary}" "${staging_dir}" "${etcd_version}"
+
+  download_private_yml
+  upload_blobs
+  remove_private_yml
+}
+
+remove_previous_blob() {
+  local previous_blob_name
+  previous_blob_name=$(bosh blobs --column path | grep etcd )
+  bosh remove-blob "${previous_blob_name}"
+}
+download() {
+  local binary_name staging_dir etcd_version
+  binary_name="$1"
+  staging_dir="$2"
+  etcd_version="$3"
+
+  wget -O "${staging_dir}/${binary_name}" "https://github.com/coreos/etcd/releases/download/v${etcd_version}/${binary_name}"
+}
+
+add_blob() {
+  local binary_name blob_name staging_dir
+  binary_name="$1"
+  staging_dir="$2"
+
+  bosh add-blob "${staging_dir}/${binary_name}" "etcd/${binary_name}"
+}
+
+download_private_yml() {
+  local NOTE_ID=8672077019646392820
+  lpass show --note ${NOTE_ID} > ./config/private.yml
+}
+
+upload_blobs() {
+  bosh upload-blobs
+}
+
+remove_private_yml() {
+    rm ./config/private.yml
+}
+
+main "$@"
