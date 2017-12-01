@@ -2,7 +2,7 @@ etcd/etcd-v3.2.10-linux-amd64.tar.gz:
   size: 10545776
   object_id: a308fbbf-a73a-4fc4-4c9b-afd68cd56784
   sha: 568b41ddde1d73062527988931a607180513d669
-golang/go1.8.linux-amd64.tar.gz:
-  size: 89803580
-  object_id: fc7bf9ef-6c00-4e53-4650-68023c0d0783
-  sha: a93fe8fc245e3554f956bc823f30ef4eb23c2068
+golang/go1.9.2.linux-amd64.tar.gz:
+  size: 104247844
+  object_id: 33d1e5ec-8a72-40a2-78f1-b17829f43151
+  sha: 94c889e039e3d2e94ed95e8f8cb747c5bc1c2b58
