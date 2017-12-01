@@ -6,7 +6,7 @@ templates:
 packages:
  - acceptance-tests
  - etcd
- - golang1.8
+ - golang
 
 properties:
   etcd.acceptance_tests.bosh.target:
