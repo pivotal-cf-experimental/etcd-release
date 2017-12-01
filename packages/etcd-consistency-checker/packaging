@@ -4,7 +4,7 @@ mkdir -p "${BOSH_INSTALL_TARGET}/src/github.com/cloudfoundry-incubator/etcd-rele
 
 cp -R ${PWD}/etcd-consistency-checker/* "${BOSH_INSTALL_TARGET}/src/github.com/cloudfoundry-incubator/etcd-release/src/etcd-consistency-checker/"
 
-export GOROOT="$(readlink -nf /var/vcap/packages/golang1.8)"
+export GOROOT="$(readlink -nf /var/vcap/packages/golang)"
 export GOPATH="${BOSH_INSTALL_TARGET}"
 export PATH="${GOROOT}/bin:${PATH}"
 
