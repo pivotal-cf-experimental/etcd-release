@@ -67,3 +67,9 @@
 [submodule "src/etcdfab/vendor/github.com/coreos/etcd"]
 	path = src/etcdfab/vendor/github.com/coreos/etcd
 	url = https://github.com/coreos/etcd
+[submodule "src/acceptance-tests/vendor/github.com/cloudfoundry/bosh-cli"]
+	path = src/acceptance-tests/vendor/github.com/cloudfoundry/bosh-cli
+	url = git@github.com:cloudfoundry/bosh-cli
+[submodule "src/acceptance-tests/vendor/github.com/cloudfoundry/bosh-utils"]
+	path = src/acceptance-tests/vendor/github.com/cloudfoundry/bosh-utils
+	url = git@github.com:cloudfoundry/bosh-utils
