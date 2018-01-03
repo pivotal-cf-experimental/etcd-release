@@ -69,7 +69,7 @@
 	url = https://github.com/coreos/etcd
 [submodule "src/acceptance-tests/vendor/github.com/cloudfoundry/bosh-cli"]
 	path = src/acceptance-tests/vendor/github.com/cloudfoundry/bosh-cli
-	url = git@github.com:cloudfoundry/bosh-cli
+	url = https://github.com/cloudfoundry/bosh-cli.git
 [submodule "src/acceptance-tests/vendor/github.com/cloudfoundry/bosh-utils"]
 	path = src/acceptance-tests/vendor/github.com/cloudfoundry/bosh-utils
-	url = git@github.com:cloudfoundry/bosh-utils
+	url = https://github.com/cloudfoundry/bosh-utils.git
