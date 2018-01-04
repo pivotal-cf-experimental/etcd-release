@@ -73,3 +73,6 @@
 [submodule "src/acceptance-tests/vendor/github.com/cloudfoundry/bosh-utils"]
 	path = src/acceptance-tests/vendor/github.com/cloudfoundry/bosh-utils
 	url = https://github.com/cloudfoundry/bosh-utils.git
+[submodule "src/acceptance-tests/vendor/golang.org/x/crypto"]
+	path = src/acceptance-tests/vendor/golang.org/x/crypto
+	url = https://github.com/golang/crypto.git
