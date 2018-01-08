@@ -18,7 +18,7 @@ exec > >(tee -a >(logger -p user.info -t vcap.${SCRIPT_NAME}.stdout) | awk -W in
 exec 2> >(tee -a >(logger -p user.error -t vcap.${SCRIPT_NAME}.stderr) | awk -W interactive '{ system("echo -n [$(date +\"%Y-%m-%d %H:%M:%S%z\")]"); print " " $0 }' >> ${LOG_DIR}/${SCRIPT_NAME}.err.log)
 
 function start_etcdfab() {
-    chmod 0777 $DATA_DIR
+    chmod 0700 $DATA_DIR
     trap handle_orphaned_etcd TERM
 
     <% if p("etcd.require_ssl") %>
