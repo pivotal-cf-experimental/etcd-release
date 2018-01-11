@@ -1,12 +1,15 @@
 package application
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/cloudfoundry-incubator/etcd-release/src/etcdfab/client"
 	"github.com/cloudfoundry-incubator/etcd-release/src/etcdfab/cluster"
@@ -107,11 +110,31 @@ func (a Application) Start() error {
 		"etcd-path": cfg.Etcd.EtcdPath,
 		"etcd-args": etcdArgs,
 	})
+
+	if cfg.DebugYo {
+		fmt.Printf("Jims ETCD Command: %s %s\n\n", cfg.Etcd.EtcdPath, strings.Join(etcdArgs, ","))
+		return errors.New("stop running here yo")
+	}
+
 	pid, err := a.command.Start(cfg.Etcd.EtcdPath, etcdArgs, a.outWriter, a.errWriter)
 	if err != nil {
 		a.logger.Error("application.start.failed", err)
 		return err
 	}
+
+	a.logger.Info("application.write-pid-file", lager.Data{
+		"pid":  pid,
+		"path": cfg.PidFile(),
+	})
+	err = ioutil.WriteFile(cfg.PidFile(), []byte(fmt.Sprintf("%d", pid)), 0644)
+	if err != nil {
+		a.logger.Error("application.write-pid-file.failed", err)
+		return err
+	}
+
+	a.logger.Info("application.start.success")
+
+	time.Sleep(60 * time.Second)
 
 	a.logger.Info("application.synchronized-controller.verify-synced")
 	syncErr := a.syncController.VerifySynced()
@@ -131,18 +154,6 @@ func (a Application) Start() error {
 		}
 		return syncErr
 	}
-
-	a.logger.Info("application.write-pid-file", lager.Data{
-		"pid":  pid,
-		"path": cfg.PidFile(),
-	})
-	err = ioutil.WriteFile(cfg.PidFile(), []byte(fmt.Sprintf("%d", pid)), 0644)
-	if err != nil {
-		a.logger.Error("application.write-pid-file.failed", err)
-		return err
-	}
-
-	a.logger.Info("application.start.success")
 
 	return nil
 }
