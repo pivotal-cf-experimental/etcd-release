@@ -176,7 +176,7 @@ var _ = Describe("split brain one leader", func() {
 
 			Eventually(func() string {
 				return monitJobStatus(followerIP, "consul_agent")
-			}, "2m", "10s").Should(Equal("running"))
+			}, "3m", "10s").Should(Equal("running"))
 		})
 	})
 
