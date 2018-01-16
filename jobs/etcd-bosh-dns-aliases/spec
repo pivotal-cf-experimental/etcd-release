@@ -1,0 +1,10 @@
+---
+name: etcd-bosh-dns-aliases
+
+templates:
+  aliases.json.erb: dns/aliases.json
+
+consumes:
+- name: etcd
+  type: etcd_service
+  optional: true

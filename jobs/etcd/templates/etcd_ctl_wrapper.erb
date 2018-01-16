@@ -10,6 +10,10 @@ exec 2> >(tee -a >(logger -p user.error -t vcap.${SCRIPT_NAME}.stderr) | awk -W 
 function main(){
   ulimit -v unlimited
   ulimit -n 100000
+
+  # Wait for BOSH DNS
+  /var/vcap/packages/bosh-dns/bin/bosh-dns-wait --checkDomain upcheck.bosh-dns. --timeout 5m
+
   sudo -u vcap $SCRIPT_DIR/etcd_ctl $@
 }
 
