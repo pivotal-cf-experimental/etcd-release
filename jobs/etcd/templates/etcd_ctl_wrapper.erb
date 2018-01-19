@@ -12,7 +12,9 @@ function main(){
   ulimit -n 100000
 
   # Wait for BOSH DNS
-  /var/vcap/packages/bosh-dns/bin/bosh-dns-wait --checkDomain upcheck.bosh-dns. --timeout 5m
+  if [[ -d /var/vcap/jobs/bosh-dns ]]; then
+      /var/vcap/jobs/bosh-dns/bin/wait
+  fi
 
   sudo -u vcap $SCRIPT_DIR/etcd_ctl $@
 }
