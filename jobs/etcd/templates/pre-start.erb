@@ -24,8 +24,19 @@ function create_directories_and_chown_to_vcap() {
     chown -R vcap:vcap ${RUN_DIR}
 }
 
+function check_filesystem() {
+  if [[ $(mountpoint -d "${DATA_DIR}") == $(mountpoint -d /) ]]
+  then
+    echo "###################################################################################################################################"
+    echo "!!! Data directory (${DATA_DIR}) is on the same filesystem as /. Have you attached persistent disk? !!!"
+    echo "####################################################################################################################################"
+    exit 1
+  fi
+}
+
 function main() {
   create_directories_and_chown_to_vcap
+  check_filesystem
 }
 
 main
