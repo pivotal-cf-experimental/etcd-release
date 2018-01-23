@@ -2,7 +2,6 @@
 
 LOG_DIR=/var/vcap/sys/log/etcd
 DATA_DIR=/var/vcap/store/etcd
-RUN_DIR=/var/vcap/sys/run/etcd
 CERT_DIR=/var/vcap/jobs/etcd/config/certs
 
 function create_directories_and_chown_to_vcap() {
@@ -17,10 +16,6 @@ function create_directories_and_chown_to_vcap() {
     chown -R vcap:vcap ${CERT_DIR}
     chmod 640 ${CERT_DIR}/*.{crt,key}
     <% end %>
-
-    # This is here for upgrade purposes to ensure RUN_DIR is owned by vcap
-    mkdir -p ${RUN_DIR}
-    chown -R vcap:vcap ${RUN_DIR}
 }
 
 function main() {
