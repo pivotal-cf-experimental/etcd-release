@@ -1,9 +1,7 @@
 #!/bin/bash -exu
 
 export PATH="${PATH}:/var/vcap/packages/etcd/bin"
-export GOROOT="$(readlink -nf /var/vcap/packages/golang)"
-export GOPATH="/var/vcap/packages/acceptance-tests"
-export PATH="${GOROOT}/bin:${PATH}"
+source /var/vcap/packages/golang-*/bosh/compile.env
 
 export EATS_CONFIG=/tmp/config.json
 export ETCD_RELEASE_VERSION="<%= p('etcd.acceptance_tests.etcd_release_version') %>"

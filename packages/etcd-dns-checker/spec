@@ -2,7 +2,7 @@
 name: etcd-dns-checker
 
 dependencies:
-  - golang
+  - golang-1.9-linux
 
 files:
   - etcd-dns-checker/**/*.go

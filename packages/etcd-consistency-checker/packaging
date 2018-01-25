@@ -1,13 +1,14 @@
 #!/bin/bash -exu
 
-mkdir -p "${BOSH_INSTALL_TARGET}/src/github.com/cloudfoundry-incubator/etcd-release/src/etcd-consistency-checker/"
+source /var/vcap/packages/golang-*/bosh/compile.env
 
-cp -R ${PWD}/etcd-consistency-checker/* "${BOSH_INSTALL_TARGET}/src/github.com/cloudfoundry-incubator/etcd-release/src/etcd-consistency-checker/"
+ETCD_RELEASE_SRC="github.com/cloudfoundry-incubator/etcd-release/src"
+ETCD_CONSISTENCY_CHECKER_SRC="$PWD/../src/$ETCD_RELEASE_SRC/"
 
-export GOROOT="$(readlink -nf /var/vcap/packages/golang)"
-export GOPATH="${BOSH_INSTALL_TARGET}"
-export PATH="${GOROOT}/bin:${PATH}"
+mkdir -p "$ETCD_CONSISTENCY_CHECKER_SRC" "$BOSH_INSTALL_TARGET"/bin
+cp -a * "$ETCD_CONSISTENCY_CHECKER_SRC"
+mv ../src ./src
 
-go install "github.com/cloudfoundry-incubator/etcd-release/src/etcd-consistency-checker"
+go build -o "$BOSH_INSTALL_TARGET"/bin/etcd-consistency-checker "src/$ETCD_RELEASE_SRC/etcd-consistency-checker/main.go"
 
 chown vcap:vcap "${BOSH_INSTALL_TARGET}/bin/etcd-consistency-checker"

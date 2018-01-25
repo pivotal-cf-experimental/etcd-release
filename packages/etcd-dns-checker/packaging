@@ -1,15 +1,14 @@
-set -e
+#!/bin/bash -exu
 
-mkdir -p /tmp/go
-export GOPATH=/tmp/go
-export GOROOT=$(readlink -nf /var/vcap/packages/golang)
+source /var/vcap/packages/golang-*/bosh/compile.env
 
-mkdir -p ${GOPATH}/src/github.com/cloudfoundry-incubator
-mv etcd-dns-checker ${GOPATH}/src/github.com/cloudfoundry-incubator/check-a-record
+ETCD_RELEASE_SRC="github.com/cloudfoundry-incubator/etcd-release/src"
+ETCD_DNS_SRC="$PWD/../src/$ETCD_RELEASE_SRC/"
 
-mkdir -p ${BOSH_INSTALL_TARGET}/bin
+mkdir -p "$ETCD_DNS_SRC" "$BOSH_INSTALL_TARGET"/bin
+cp -a * "$ETCD_DNS_SRC"
+mv ../src ./src
 
-export PATH=${GOROOT}/bin:$PATH
+go build -o "$BOSH_INSTALL_TARGET"/bin/check-a-record "src/$ETCD_RELEASE_SRC/etcd-dns-checker/main.go"
 
-go build -o ${BOSH_INSTALL_TARGET}/bin/check-a-record github.com/cloudfoundry-incubator/check-a-record
 chown vcap:vcap "${BOSH_INSTALL_TARGET}/bin/check-a-record"

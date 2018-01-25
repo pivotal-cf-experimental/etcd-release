@@ -1,18 +1,14 @@
 #!/bin/bash -exu
-set -e
 
-mkdir -p /tmp/go
-export GOPATH=/tmp/go
-export GOROOT=$(readlink -nf /var/vcap/packages/golang)
+source /var/vcap/packages/golang-*/bosh/compile.env
 
-mkdir -p "${BOSH_INSTALL_TARGET}/src/github.com/cloudfoundry-incubator/etcd-release/src/etcd-proxy"
+ETCD_RELEASE_SRC="github.com/cloudfoundry-incubator/etcd-release/src"
+ETCD_PROXY_SRC="$PWD/../src/$ETCD_RELEASE_SRC/"
 
-cp -R ${PWD}/etcd-proxy/* "${BOSH_INSTALL_TARGET}/src/github.com/cloudfoundry-incubator/etcd-release/src/etcd-proxy"
+mkdir -p "$ETCD_PROXY_SRC" "$BOSH_INSTALL_TARGET"/bin
+cp -a * "$ETCD_PROXY_SRC"
+mv ../src ./src
 
-export GOROOT="$(readlink -nf /var/vcap/packages/golang)"
-export GOPATH="${BOSH_INSTALL_TARGET}"
-export PATH="${GOROOT}/bin:${PATH}"
-
-go install "github.com/cloudfoundry-incubator/etcd-release/src/etcd-proxy"
+go build -o "$BOSH_INSTALL_TARGET"/bin/etcd-proxy "src/$ETCD_RELEASE_SRC/etcd-proxy/etcd_proxy.go"
 
 chown vcap:vcap "${BOSH_INSTALL_TARGET}/bin/etcd-proxy"
