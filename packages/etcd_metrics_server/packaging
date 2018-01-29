@@ -2,13 +2,15 @@
 
 source /var/vcap/packages/golang-*/bosh/compile.env
 
-ETCD_RELEASE_SRC="github.com/cloudfoundry-incubator/etcd-release/src"
-ETCD_METRICS_SERVER_SRC="$PWD/../src/$ETCD_RELEASE_SRC/"
+REPO_NAME=github.com/cloudfoundry-incubator/etcd-metrics-server
+REPO_DIR=${BOSH_INSTALL_TARGET}/src/${REPO_NAME}
 
-mkdir -p "$ETCD_METRICS_SERVER_SRC" "$BOSH_INSTALL_TARGET"/bin
-cp -a * "$ETCD_METRICS_SERVER_SRC"
-mv ../src ./src
+mkdir -p $(dirname $REPO_DIR)
 
-go build -o "$BOSH_INSTALL_TARGET"/bin/etcd-metrics-server "src/$ETCD_RELEASE_SRC/etcd-metrics-server/cmd/etcd-metrics-server/main.go"
+cp -a $(basename $REPO_NAME)/ $REPO_DIR
+
+export GOPATH=$GOPATH:$BOSH_INSTALL_TARGET:${REPO_DIR}
+
+go install ${REPO_NAME}/cmd/etcd-metrics-server
 
 chown vcap:vcap "${BOSH_INSTALL_TARGET}/bin/etcd-metrics-server"

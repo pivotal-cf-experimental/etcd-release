@@ -5,6 +5,10 @@ source /var/vcap/packages/golang-*/bosh/compile.env
 ETCD_RELEASE_SRC="github.com/cloudfoundry-incubator/etcd-release/src"
 ETCD_ACCEPTANCE_TESTS_SRC="$PWD/../src/$ETCD_RELEASE_SRC/"
 
+mkdir -p "${BOSH_INSTALL_TARGET}/src/github.com/cloudfoundry-incubator/etcd-release/src/acceptance-tests/"
+cp -R ${PWD}/acceptance-tests/* \
+"${BOSH_INSTALL_TARGET}/src/github.com/cloudfoundry-incubator/etcd-release/src/acceptance-tests/"
+
 mkdir -p "$ETCD_ACCEPTANCE_TESTS_SRC" "$BOSH_INSTALL_TARGET"/bin
 cp -a * "$ETCD_ACCEPTANCE_TESTS_SRC"
 mv ../src ./src
