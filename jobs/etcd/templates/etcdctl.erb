@@ -1,0 +1,19 @@
+#!/bin/bash
+
+source /var/vcap/jobs/etcd/bin/etcd_bosh_utils.sh
+
+if [[ "${ETCDCTL_API}" -eq "3" ]]; then
+  /var/vcap/packages/etcd/etcdctl \
+    --cacert /var/vcap/jobs/etcd/config/certs/server-ca.crt \
+    --cert /var/vcap/jobs/etcd/config/certs/client.crt \
+    --key /var/vcap/jobs/etcd/config/certs/client.key \
+    --endpoints "${cluster_members}" \
+    "$@"
+else
+  /var/vcap/packages/etcd/etcdctl \
+    --ca-file /var/vcap/jobs/etcd/config/certs/server-ca.crt \
+    --cert-file /var/vcap/jobs/etcd/config/certs/client.crt \
+    --key-file /var/vcap/jobs/etcd/config/certs/client.key \
+    --endpoints "${cluster_members}" \
+    "$@"
+fi

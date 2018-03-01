@@ -20,6 +20,7 @@ templates:
   peer-ca.crt.erb: config/certs/peer-ca.crt
   peer.crt.erb: config/certs/peer.crt
   peer.key.erb: config/certs/peer.key
+  etcdctl.erb: bin/etcdctl
 
 packages:
   - etcd-common
