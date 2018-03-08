@@ -1,6 +1,8 @@
 ---
 name: etcd
 templates:
+  post-start.erb: bin/post-start
+  ensure-member-healthy.erb: bin/ensure-member-healthy
   pre-start.erb: bin/pre-start
   dns_health_check.erb: bin/dns_health_check
   drain: bin/drain

@@ -2,6 +2,12 @@
 
 source /var/vcap/jobs/etcd/bin/etcd_bosh_utils.sh
 
+etcd_endpoints="${cluster_member}"
+
+if [[ "${LOCAL}" == "true" ]]; then
+  etcd_endpoints="${advertise_client_url}"
+fi
+
 if [[ "${ETCDCTL_API}" -eq "3" ]]; then
   /var/vcap/packages/etcd/etcdctl \
     --cacert /var/vcap/jobs/etcd/config/certs/server-ca.crt \

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -euo pipefail
+
+timeout 600 /var/vcap/jobs/etcd/bin/ensure-member-healthy
