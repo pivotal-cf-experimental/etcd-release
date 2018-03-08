@@ -59,7 +59,6 @@ var _ = Describe("Application", func() {
 
 			fakeCommand           *fakes.CommandWrapper
 			fakeClusterController *fakes.ClusterController
-			fakeSyncController    *fakes.SyncController
 			fakeEtcdClient        *fakes.EtcdClient
 			fakeLogger            *fakes.Logger
 
@@ -79,8 +78,6 @@ var _ = Describe("Application", func() {
 				Members: "etcd-0=http://some-ip-1:7001",
 				State:   "new",
 			}
-
-			fakeSyncController = &fakes.SyncController{}
 
 			fakeLogger = &fakes.Logger{}
 
@@ -171,7 +168,6 @@ var _ = Describe("Application", func() {
 					LinkConfigFilePath: linkConfigFileName,
 					EtcdClient:         fakeEtcdClient,
 					ClusterController:  fakeClusterController,
-					SyncController:     fakeSyncController,
 					OutWriter:          &outWriter,
 					ErrWriter:          &errWriter,
 					Logger:             fakeLogger,
@@ -212,10 +208,6 @@ var _ = Describe("Application", func() {
 				By("calling GetInitialCluster and GetInitialClusterState on the cluster controller", func() {
 					Expect(fakeClusterController.GetInitialClusterStateCall.CallCount).To(Equal(1))
 					Expect(fakeClusterController.GetInitialClusterStateCall.Receives.Config).To(Equal(etcdfabConfig))
-				})
-
-				By("verifying the cluster is synced", func() {
-					Expect(fakeSyncController.VerifySyncedCall.CallCount).To(Equal(1))
 				})
 
 				By("writing the pid of etcd to the run dir", func() {
@@ -327,164 +319,6 @@ var _ = Describe("Application", func() {
 					})
 				})
 
-				Context("when syncController.VerifySynced returns an error", func() {
-					BeforeEach(func() {
-						fakeSyncController.VerifySyncedCall.Returns.Error = errors.New("failed to verify synced")
-						fakeClusterController.GetInitialClusterStateCall.Returns.InitialClusterState = cluster.InitialClusterState{
-							State: "existing",
-						}
-						fakeEtcdClient.MemberListCall.Returns.MemberList = []client.Member{
-							{
-								ID:   "some-id",
-								Name: "some-name-3",
-							},
-						}
-					})
-
-					It("cleans up", func() {
-						err := app.Start()
-						Expect(err).To(MatchError("failed to verify synced"))
-
-						By("removing the node from the cluster", func() {
-							Expect(fakeEtcdClient.MemberRemoveCall.CallCount).To(Equal(1))
-							Expect(fakeEtcdClient.MemberRemoveCall.Receives.MemberID).To(Equal("some-id"))
-						})
-
-						By("removing the contents of the data dir", func() {
-							d, err := os.Open(dataDir)
-							Expect(err).NotTo(HaveOccurred())
-							defer d.Close()
-							files, err := d.Readdirnames(-1)
-							Expect(err).NotTo(HaveOccurred())
-							Expect(len(files)).To(Equal(0))
-						})
-
-						By("killing the etcd process", func() {
-							Expect(fakeCommand.KillCall.CallCount).To(Equal(1))
-							Expect(fakeCommand.KillCall.Receives.Pid).To(Equal(etcdPid))
-						})
-
-						By("removing the pidfile", func() {
-							Expect(etcdPidPath).NotTo(BeARegularFile())
-						})
-
-						By("logging the error", func() {
-							Expect(fakeLogger.Messages()).To(gomegamatchers.ContainSequence([]fakes.LoggerMessage{
-								{
-									Action: "application.synchronized-controller.verify-synced.failed",
-									Error:  err,
-								},
-								{
-									Action: "application.remove-self-from-cluster",
-								},
-								{
-									Action: "application.etcd-client.member-remove",
-									Data: []lager.Data{{
-										"member-id": "some-id",
-									}},
-								},
-							}))
-						})
-					})
-
-					Context("when the cluster state is new", func() {
-						BeforeEach(func() {
-							fakeClusterController.GetInitialClusterStateCall.Returns.InitialClusterState = cluster.InitialClusterState{
-								State: "new",
-							}
-						})
-
-						It("skips removing self from cluster", func() {
-							err := app.Start()
-							Expect(err).To(MatchError("failed to verify synced"))
-
-							Expect(fakeEtcdClient.MemberRemoveCall.CallCount).To(Equal(0))
-
-							Expect(fakeLogger.Messages()).To(gomegamatchers.ContainSequence([]fakes.LoggerMessage{
-								{
-									Action: "application.synchronized-controller.verify-synced.failed",
-									Error:  err,
-								},
-								{
-									Action: "application.remove-data-dir",
-									Data: []lager.Data{{
-										"data-dir": dataDir,
-									}},
-								},
-								{
-									Action: "application.kill",
-								},
-							}))
-						})
-					})
-
-					Context("when it cannot kill the etcd process", func() {
-						BeforeEach(func() {
-							fakeCommand.KillCall.Returns.Error = errors.New("failed to kill process")
-						})
-
-						It("stops cleaning up, logs the error and returns", func() {
-							err := app.Start()
-							Expect(err).To(MatchError("failed to kill process"))
-
-							Expect(fakeCommand.KillCall.CallCount).To(Equal(1))
-							Expect(fakeCommand.KillCall.Receives.Pid).To(Equal(etcdPid))
-							Expect(etcdPidPath).To(BeARegularFile())
-							Expect(fakeLogger.Messages()).To(gomegamatchers.ContainSequence([]fakes.LoggerMessage{
-								{
-									Action: "application.kill-pid",
-									Data: []lager.Data{{
-										"pid": etcdPid,
-									}},
-								},
-								{
-									Action: "application.kill-pid.failed",
-									Error:  err,
-								},
-							}))
-						})
-					})
-
-					Context("when it cannot remove the node from the cluster", func() {
-						BeforeEach(func() {
-							fakeEtcdClient.MemberRemoveCall.Returns.Error = errors.New("failed to remove member")
-						})
-
-						It("continues cleanup but logs the error", func() {
-							err := app.Start()
-							Expect(err).To(MatchError("failed to verify synced"))
-
-							Expect(fakeCommand.KillCall.CallCount).To(Equal(1))
-							Expect(fakeCommand.KillCall.Receives.Pid).To(Equal(etcdPid))
-							Expect(etcdPidPath).NotTo(BeARegularFile())
-							Expect(fakeLogger.Messages()).To(gomegamatchers.ContainSequence([]fakes.LoggerMessage{
-								{
-									Action: "application.remove-self-from-cluster",
-								},
-								{
-									Action: "application.etcd-client.member-remove",
-									Data: []lager.Data{{
-										"member-id": "some-id",
-									}},
-								},
-								{
-									Action: "application.etcd-client.member-remove.failed",
-									Error:  errors.New("failed to remove member"),
-								},
-								{
-									Action: "application.remove-data-dir",
-									Data: []lager.Data{{
-										"data-dir": dataDir,
-									}},
-								},
-								{
-									Action: "application.kill",
-								},
-							}))
-						})
-					})
-				})
-
 				Context("when it cannot write to the specified PID file", func() {
 					BeforeEach(func() {
 						configuration := map[string]interface{}{
@@ -499,7 +333,6 @@ var _ = Describe("Application", func() {
 							LinkConfigFilePath: linkConfigFileName,
 							EtcdClient:         fakeEtcdClient,
 							ClusterController:  fakeClusterController,
-							SyncController:     fakeSyncController,
 							Logger:             fakeLogger,
 						})
 					})
@@ -528,9 +361,9 @@ var _ = Describe("Application", func() {
 						"external_ip": "some-external-ip",
 					},
 					"etcd": map[string]interface{}{
-						"etcd_path":                          "path-to-etcd",
-						"cert_dir":                           "some/cert/dir",
-						"run_dir":                            runDir,
+						"etcd_path": "path-to-etcd",
+						"cert_dir":  "some/cert/dir",
+						"run_dir":   runDir,
 						"heartbeat_interval_in_milliseconds": 10,
 						"election_timeout_in_milliseconds":   20,
 						"peer_require_ssl":                   true,
@@ -560,7 +393,6 @@ var _ = Describe("Application", func() {
 					LinkConfigFilePath: linkConfigFileName,
 					EtcdClient:         fakeEtcdClient,
 					ClusterController:  fakeClusterController,
-					SyncController:     fakeSyncController,
 					OutWriter:          &outWriter,
 					ErrWriter:          &errWriter,
 					Logger:             fakeLogger,
@@ -629,7 +461,6 @@ var _ = Describe("Application", func() {
 
 			fakeCommand           *fakes.CommandWrapper
 			fakeClusterController *fakes.ClusterController
-			fakeSyncController    *fakes.SyncController
 			fakeEtcdClient        *fakes.EtcdClient
 			fakeLogger            *fakes.Logger
 
@@ -643,7 +474,6 @@ var _ = Describe("Application", func() {
 			fakeCommand = &fakes.CommandWrapper{}
 			fakeEtcdClient = &fakes.EtcdClient{}
 			fakeClusterController = &fakes.ClusterController{}
-			fakeSyncController = &fakes.SyncController{}
 			fakeLogger = &fakes.Logger{}
 
 			fakeEtcdClient.MemberListCall.Returns.MemberList = []client.Member{
@@ -723,7 +553,6 @@ var _ = Describe("Application", func() {
 				LinkConfigFilePath: linkConfigFileName,
 				EtcdClient:         fakeEtcdClient,
 				ClusterController:  fakeClusterController,
-				SyncController:     fakeSyncController,
 				OutWriter:          &outWriter,
 				ErrWriter:          &errWriter,
 				Logger:             fakeLogger,
@@ -863,7 +692,6 @@ var _ = Describe("Application", func() {
 					LinkConfigFilePath: linkConfigFileName,
 					EtcdClient:         fakeEtcdClient,
 					ClusterController:  fakeClusterController,
-					SyncController:     fakeSyncController,
 					OutWriter:          &outWriter,
 					ErrWriter:          &errWriter,
 					Logger:             fakeLogger,
@@ -1149,7 +977,6 @@ var _ = Describe("Application", func() {
 					LinkConfigFilePath: linkConfigFileName,
 					EtcdClient:         fakeEtcdClient,
 					ClusterController:  fakeClusterController,
-					SyncController:     fakeSyncController,
 					Logger:             fakeLogger,
 				})
 			})

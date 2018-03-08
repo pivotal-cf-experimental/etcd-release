@@ -34,13 +34,13 @@ type Etcd struct {
 	ClientIP               string `json:"client_ip"`
 	AdvertiseURLsDNSSuffix string `json:"advertise_urls_dns_suffix"`
 	Machines               []string
-	EnableDebugLogging     bool   `json:"enable_debug_logging"`
-	DeleteDataDirOnStop    bool   `json:"delete_data_dir_on_stop"`
+	EnableDebugLogging     bool `json:"enable_debug_logging"`
+	DeleteDataDirOnStop    bool `json:"delete_data_dir_on_stop"`
 }
 
 type Config struct {
-	Node    Node
-	Etcd    Etcd
+	Node Node
+	Etcd Etcd
 }
 
 func defaultConfig() Config {

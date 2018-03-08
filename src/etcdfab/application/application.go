@@ -21,7 +21,6 @@ type Application struct {
 	linkConfigFilePath string
 	etcdClient         etcdClient
 	clusterController  clusterController
-	syncController     syncController
 	outWriter          io.Writer
 	errWriter          io.Writer
 	logger             logger
@@ -30,10 +29,6 @@ type Application struct {
 type command interface {
 	Start(string, []string, io.Writer, io.Writer) (int, error)
 	Kill(int) error
-}
-
-type syncController interface {
-	VerifySynced() error
 }
 
 type clusterController interface {
@@ -57,7 +52,6 @@ type NewArgs struct {
 	LinkConfigFilePath string
 	EtcdClient         etcdClient
 	ClusterController  clusterController
-	SyncController     syncController
 	OutWriter          io.Writer
 	ErrWriter          io.Writer
 	Logger             logger
@@ -70,7 +64,6 @@ func New(args NewArgs) Application {
 		linkConfigFilePath: args.LinkConfigFilePath,
 		etcdClient:         args.EtcdClient,
 		clusterController:  args.ClusterController,
-		syncController:     args.SyncController,
 		outWriter:          args.OutWriter,
 		errWriter:          args.ErrWriter,
 		logger:             args.Logger,
@@ -111,25 +104,6 @@ func (a Application) Start() error {
 	if err != nil {
 		a.logger.Error("application.start.failed", err)
 		return err
-	}
-
-	a.logger.Info("application.synchronized-controller.verify-synced")
-	syncErr := a.syncController.VerifySynced()
-	if syncErr != nil {
-		a.logger.Error("application.synchronized-controller.verify-synced.failed", syncErr)
-
-		if initialClusterState.State == "existing" {
-			a.logger.Info("application.remove-self-from-cluster")
-			a.removeSelfFromCluster(cfg)
-		}
-		a.removeDataDir(cfg)
-
-		a.logger.Info("application.kill")
-		killErr := a.kill(cfg.PidFile())
-		if killErr != nil {
-			return killErr
-		}
-		return syncErr
 	}
 
 	a.logger.Info("application.write-pid-file", lager.Data{

@@ -140,20 +140,6 @@ var _ = Describe("EtcdFab", func() {
 				})
 			})
 
-			Context("when etcd cluster does not sync", func() {
-				BeforeEach(func() {
-					etcdServer.SetKeysReturn(http.StatusInternalServerError)
-				})
-
-				It("does not write a pid and exits 1", func() {
-					session, err := gexec.Start(etcdFabCommand, GinkgoWriter, GinkgoWriter)
-					Expect(err).NotTo(HaveOccurred())
-					Eventually(session, 30*time.Second).Should(gexec.Exit(1))
-
-					Expect(filepath.Join(runDir, "etcd.pid")).NotTo(BeARegularFile())
-				})
-			})
-
 			Context("when no prior cluster members exist", func() {
 				It("starts etcd with proper flags and initial-cluster-state new", func() {
 					session, err := gexec.Start(etcdFabCommand, GinkgoWriter, GinkgoWriter)
