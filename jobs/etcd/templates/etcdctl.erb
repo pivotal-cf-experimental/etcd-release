@@ -10,20 +10,20 @@ fi
 
 if [[ "${ETCDCTL_API}" -eq "3" ]]; then
   /var/vcap/packages/etcd/etcdctl \
-  <% if p("etcd.require_ssl") || p("etcd.peer_require_ssl") %>
+  <% if p("etcd.require_ssl") || p("etcd.peer_require_ssl") %> \
     --cacert /var/vcap/jobs/etcd/config/certs/server-ca.crt \
     --cert /var/vcap/jobs/etcd/config/certs/client.crt \
     --key /var/vcap/jobs/etcd/config/certs/client.key \
-  <% end %>
+  <% end %> \
     --endpoints "${etcd_endpoints}" \
     "$@"
 else
   /var/vcap/packages/etcd/etcdctl \
-  <% if p("etcd.require_ssl") || p("etcd.peer_require_ssl") %>
+  <% if p("etcd.require_ssl") || p("etcd.peer_require_ssl") %> \
     --ca-file /var/vcap/jobs/etcd/config/certs/server-ca.crt \
     --cert-file /var/vcap/jobs/etcd/config/certs/client.crt \
     --key-file /var/vcap/jobs/etcd/config/certs/client.key \
-  <% end %>
+  <% end %> \
     --endpoints "${etcd_endpoints}" \
     "$@"
 fi
