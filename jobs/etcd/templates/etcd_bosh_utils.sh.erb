@@ -65,6 +65,15 @@
     end
   end
 
+  def cluster_endpoints
+    if p("etcd.require_ssl") || p("etcd.peer_require_ssl")
+      cluster_url = "#{client_protocol}://#{p("etcd.advertise_urls_dns_suffix")}:4001"
+      return cluster_url
+    else
+      cluster_member_ips.join(",")
+    end
+  end
+
   def consistency_checker_cluster_members
     if p("etcd.require_ssl") || p("etcd.peer_require_ssl")
       cluster_member_urls = nil
@@ -96,6 +105,7 @@ advertise_peer_url="<%= advertise_peer_url %>"
 advertise_client_url="<%= advertise_client_url %>"
 consistency_checker_cluster_members="<%= consistency_checker_cluster_members %>"
 cluster_members="<%= cluster_members %>"
+cluster_endpoints="<%= cluster_endpoints %>"
 
 <% if p("etcd.require_ssl") || p("etcd.peer_require_ssl") %>
 CERT_DIR=/var/vcap/jobs/etcd/config/certs
