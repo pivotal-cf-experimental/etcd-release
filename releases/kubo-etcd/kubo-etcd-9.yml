@@ -41,7 +41,7 @@ packages:
   fingerprint: ffda219014289439449fab8042504e8f48d39b28
   sha1: 6e8c324b9a87550acf28ba33480e8ad94fa255e8
   dependencies:
-  - golang-1.10-linux
+  - golang-1.9-linux
 - name: etcd
   version: 1ac5b63bbecec7bb87371b745b01e61eaeb8abc6
   fingerprint: 1ac5b63bbecec7bb87371b745b01e61eaeb8abc6
@@ -57,32 +57,32 @@ packages:
   fingerprint: be449fb30511d18b487ab20019c05aa98cc72949
   sha1: 93ced455fec00b81a86c70d0ed46c0748075b478
   dependencies:
-  - golang-1.10-linux
+  - golang-1.9-linux
 - name: etcd-dns-checker
   version: ffa21d0580837518f3b50266c129752621f17668
   fingerprint: ffa21d0580837518f3b50266c129752621f17668
   sha1: 51d39d94e14f83df6b4a6accff649a776d33bbe7
   dependencies:
-  - golang-1.10-linux
+  - golang-1.9-linux
 - name: etcd_metrics_server
   version: a59e30d0d0baf420a78448ba9699670b454e3d2f
   fingerprint: a59e30d0d0baf420a78448ba9699670b454e3d2f
   sha1: 21f3a77f0e90210297675c6b86ccf2bc8b345e37
   dependencies:
-  - golang-1.10-linux
+  - golang-1.9-linux
 - name: etcd_proxy
   version: 6842b34ede54c03a644a547f9f3fa94cd411ac28
   fingerprint: 6842b34ede54c03a644a547f9f3fa94cd411ac28
   sha1: 476c0952173d90e6a464a2842ff939828c01aa64
   dependencies:
-  - golang-1.10-linux
+  - golang-1.9-linux
 - name: etcdfab
   version: d4ad331b46b449f77c6427c5484fcd89a3674230
   fingerprint: d4ad331b46b449f77c6427c5484fcd89a3674230
   sha1: 41ffb724195377ec7b6e0c13d3f4f836d6e3ce3b
   dependencies:
-  - golang-1.10-linux
-- name: golang-1.10-linux
+  - golang-1.9-linux
+- name: golang-1.9-linux
   version: 8d6c67abda8684ce454f0bc74050a213456573ff
   fingerprint: 8d6c67abda8684ce454f0bc74050a213456573ff
   sha1: e9dd8e92accad2091d9f19d6ffabc8e019e58f6b

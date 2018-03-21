@@ -2,7 +2,7 @@
 name: etcd-consistency-checker
 
 dependencies:
-  - golang-1.10-linux
+  - golang-1.9-linux
 
 files:
   - etcd-consistency-checker/**/*.go
