@@ -1,4 +1,5 @@
-#!/bin/bash -exu
+#!/usr/bin/env bash
+set -exu
 
 LOG_DIR=/var/vcap/sys/log/etcd
 DATA_DIR=/var/vcap/store/etcd
@@ -18,8 +19,19 @@ function create_directories_and_chown_to_vcap() {
     <% end %>
 }
 
+function check_filesystem() {
+  if [[ $(mountpoint -d "${DATA_DIR}") == $(mountpoint -d /) ]]
+  then
+    echo "###################################################################################################################################"
+    echo "!!! Data directory (${DATA_DIR}) is on the same filesystem as /. Have you attached persistent disk? !!!"
+    echo "####################################################################################################################################"
+    exit 1
+  fi
+}
+
 function main() {
   create_directories_and_chown_to_vcap
+  check_filesystem
 }
 
 main
